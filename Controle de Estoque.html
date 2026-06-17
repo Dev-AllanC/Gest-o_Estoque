@@ -1,0 +1,2809 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Boteco do França | Controle de Estoque</title>
+    <style>
+      :root {
+        --bg: #f5f4ef;
+        --panel: #ffffff;
+        --panel-2: #f7f8f5;
+        --ink: #1c211c;
+        --muted: #6b7169;
+        --line: #dadfd4;
+        --brand: #155f49;
+        --brand-2: #b7342b;
+        --gold: #c8922d;
+        --blue: #276c91;
+        --danger: #ad2f2f;
+        --ok: #1d7a4a;
+        --shadow: 0 18px 48px rgba(31, 38, 27, 0.12);
+        --radius: 8px;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 260px 1fr;
+      }
+
+      .app.auth-locked {
+        display: none;
+      }
+
+      .login-screen {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: minmax(300px, 440px) 1fr;
+        background: #17221c;
+        color: #fff;
+      }
+
+      .login-screen.hidden {
+        display: none;
+      }
+
+      .login-panel {
+        background: var(--panel);
+        color: var(--ink);
+        padding: 34px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 22px;
+        min-height: 100vh;
+      }
+
+      .login-copy {
+        padding: 42px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 18px;
+        background:
+          linear-gradient(
+            135deg,
+            rgba(21, 95, 73, 0.92),
+            rgba(23, 34, 28, 0.94)
+          ),
+          linear-gradient(45deg, #b7342b, #c8922d);
+      }
+
+      .login-copy h2 {
+        margin: 0;
+        max-width: 680px;
+        font-size: clamp(34px, 6vw, 72px);
+        line-height: 0.95;
+        letter-spacing: 0;
+      }
+
+      .login-copy p {
+        margin: 0;
+        max-width: 620px;
+        color: #e4ece0;
+        font-size: 18px;
+        line-height: 1.45;
+      }
+
+      .login-form {
+        display: grid;
+        gap: 13px;
+      }
+
+      .login-panel .brand {
+        color: var(--ink);
+        grid-template-columns: 48px 1fr;
+      }
+
+      .login-panel .brand span {
+        color: var(--muted);
+      }
+
+      .login-hint {
+        border: 1px solid var(--line);
+        background: var(--panel-2);
+        border-radius: 8px;
+        padding: 12px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .sidebar {
+        background: #17221c;
+        color: #f7f4e9;
+        padding: 22px 18px;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+      }
+
+      .brand {
+        display: grid;
+        grid-template-columns: 48px 1fr;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .mark {
+        width: 48px;
+        height: 48px;
+        border: 2px solid rgba(255, 255, 255, 0.65);
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #1f7358, #b7342b);
+        box-shadow: inset 0 0 0 5px rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        font-weight: 850;
+        letter-spacing: 0;
+      }
+
+      .brand h1 {
+        font-size: 18px;
+        line-height: 1.05;
+        margin: 0;
+      }
+
+      .brand span {
+        display: block;
+        color: #cdd6c8;
+        font-size: 12px;
+        margin-top: 4px;
+      }
+
+      .nav {
+        display: grid;
+        gap: 7px;
+      }
+
+      .nav button {
+        border: 0;
+        background: transparent;
+        color: #dfe7dc;
+        min-height: 42px;
+        border-radius: 8px;
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        align-items: center;
+        text-align: left;
+        padding: 8px 10px;
+      }
+
+      .nav button:hover,
+      .nav button.active {
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+      }
+
+      .ico {
+        width: 24px;
+        height: 24px;
+        display: inline-grid;
+        place-items: center;
+        color: currentColor;
+      }
+
+      .ico svg {
+        width: 19px;
+        height: 19px;
+        stroke: currentColor;
+        stroke-width: 2;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .sidebar-footer {
+        margin-top: auto;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+        padding-top: 14px;
+        color: #cdd6c8;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .main {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        min-height: 86px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 26px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(245, 244, 239, 0.92);
+        backdrop-filter: blur(12px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .title h2 {
+        margin: 0;
+        font-size: 25px;
+        letter-spacing: 0;
+      }
+
+      .title p {
+        margin: 5px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .user-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 40px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 8px;
+        padding: 8px 11px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .btn {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--ink);
+        min-height: 40px;
+        border-radius: 8px;
+        padding: 8px 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-weight: 650;
+        white-space: nowrap;
+      }
+
+      .btn.primary {
+        background: var(--brand);
+        color: #fff;
+        border-color: var(--brand);
+      }
+
+      .btn.danger {
+        background: #fff6f5;
+        color: var(--danger);
+        border-color: #e5c0bd;
+      }
+
+      .btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .btn.icon {
+        width: 40px;
+        padding: 8px;
+      }
+
+      .content {
+        padding: 22px 26px 36px;
+        display: grid;
+        gap: 18px;
+      }
+
+      .section {
+        display: none;
+      }
+      .section.active {
+        display: grid;
+        gap: 18px;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .filters {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      label {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--ink);
+        border-radius: 8px;
+        padding: 10px 11px;
+        min-height: 40px;
+        outline: none;
+      }
+
+      textarea {
+        min-height: 74px;
+        resize: vertical;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--brand);
+        box-shadow: 0 0 0 3px rgba(21, 95, 73, 0.14);
+      }
+
+      .search {
+        min-width: min(340px, 100%);
+      }
+
+      .grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .kpis {
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: 0 1px 0 rgba(29, 35, 26, 0.03);
+      }
+
+      .metric {
+        padding: 15px;
+        display: grid;
+        gap: 8px;
+        min-height: 126px;
+        align-content: space-between;
+      }
+
+      .metric .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .metric strong {
+        font-size: 27px;
+        letter-spacing: 0;
+        line-height: 1;
+      }
+
+      .metric small {
+        color: var(--muted);
+        line-height: 1.35;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+        gap: 14px;
+        align-items: start;
+      }
+
+      .panel-title {
+        padding: 15px 16px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .panel-title h3 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .panel-title span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .table-wrap {
+        width: 100%;
+        overflow: auto;
+        padding: 12px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 760px;
+      }
+
+      th,
+      td {
+        padding: 11px 10px;
+        border-bottom: 1px solid #edf0e9;
+        text-align: left;
+        vertical-align: middle;
+        font-size: 14px;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        background: #fafbf8;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 26px;
+        padding: 4px 9px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 750;
+        white-space: nowrap;
+      }
+
+      .pill.ok {
+        background: #eaf6ef;
+        color: var(--ok);
+      }
+      .pill.warn {
+        background: #fff6df;
+        color: #8b640f;
+      }
+      .pill.bad {
+        background: #fff0ef;
+        color: var(--danger);
+      }
+      .pill.info {
+        background: #eaf3f7;
+        color: var(--blue);
+      }
+      .pill.dark {
+        background: #eef0ec;
+        color: #3f463d;
+      }
+
+      .action-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: nowrap;
+      }
+
+      .chart {
+        padding: 16px;
+        min-height: 260px;
+        display: grid;
+        align-content: end;
+        gap: 12px;
+      }
+
+      .bars {
+        height: 185px;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+        align-items: end;
+        border-left: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        padding: 0 0 0 8px;
+      }
+
+      .bar {
+        min-height: 5px;
+        background: linear-gradient(180deg, var(--brand), #73a78d);
+        border-radius: 7px 7px 0 0;
+        position: relative;
+      }
+
+      .bar.out {
+        background: linear-gradient(180deg, var(--brand-2), #d98268);
+      }
+
+      .bar span {
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 6px);
+        transform: translateX(-50%);
+        color: var(--muted);
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      .legend {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+        background: var(--brand);
+      }
+      .dot.out {
+        background: var(--brand-2);
+      }
+
+      .list {
+        display: grid;
+        gap: 10px;
+        padding: 13px 16px 16px;
+      }
+
+      .alert {
+        display: grid;
+        gap: 5px;
+        padding: 11px;
+        border: 1px solid var(--line);
+        background: var(--panel-2);
+        border-radius: 8px;
+      }
+
+      .alert strong {
+        font-size: 14px;
+      }
+
+      .alert span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .user-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 12px;
+        padding: 16px;
+      }
+
+      .user-card {
+        display: grid;
+        gap: 10px;
+        padding: 13px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel-2);
+      }
+
+      .user-card strong {
+        font-size: 16px;
+      }
+
+      .user-card span {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(150px, 1fr));
+        gap: 12px;
+        padding: 16px;
+      }
+
+      .form-grid .wide {
+        grid-column: span 2;
+      }
+      .form-grid .full {
+        grid-column: 1 / -1;
+      }
+
+      .empty {
+        padding: 30px 18px;
+        text-align: center;
+        color: var(--muted);
+      }
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(11, 16, 12, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        z-index: 50;
+      }
+
+      .modal-backdrop.open {
+        display: flex;
+      }
+
+      .modal {
+        width: min(880px, 100%);
+        max-height: 92vh;
+        overflow: auto;
+        background: var(--panel);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--line);
+      }
+
+      .modal header {
+        position: static;
+        min-height: auto;
+        background: #fff;
+        padding: 16px;
+      }
+
+      .modal h3 {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      .modal-footer {
+        padding: 14px 16px 16px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        border-top: 1px solid var(--line);
+        flex-wrap: wrap;
+      }
+
+      .toast {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        padding: 12px 14px;
+        background: #17221c;
+        color: #fff;
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        transform: translateY(22px);
+        opacity: 0;
+        transition: 0.18s ease;
+        z-index: 80;
+        max-width: min(360px, calc(100vw - 36px));
+      }
+
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .mobile-menu {
+        display: none;
+      }
+
+      @media (max-width: 1020px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          height: auto;
+          position: static;
+          padding: 14px;
+        }
+        .brand {
+          grid-template-columns: 40px 1fr auto;
+        }
+        .mark {
+          width: 40px;
+          height: 40px;
+        }
+        .mobile-menu {
+          display: inline-flex;
+        }
+        .nav {
+          display: none;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .nav.open {
+          display: grid;
+        }
+        .sidebar-footer {
+          display: none;
+        }
+        header {
+          top: 0;
+        }
+        .split {
+          grid-template-columns: 1fr;
+        }
+        .kpis {
+          grid-template-columns: repeat(2, minmax(150px, 1fr));
+        }
+      }
+
+      @media (max-width: 700px) {
+        .login-screen {
+          grid-template-columns: 1fr;
+        }
+        .login-copy {
+          min-height: 260px;
+          padding: 28px;
+          justify-content: center;
+        }
+        .login-panel {
+          min-height: auto;
+          padding: 24px;
+        }
+        header {
+          align-items: flex-start;
+          flex-direction: column;
+          padding: 16px;
+        }
+        .content {
+          padding: 16px;
+        }
+        .header-actions,
+        .toolbar,
+        .filters {
+          width: 100%;
+        }
+        .btn {
+          flex: 1 1 auto;
+        }
+        .btn.icon {
+          flex: 0 0 40px;
+        }
+        .kpis {
+          grid-template-columns: 1fr;
+        }
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+        .form-grid .wide,
+        .form-grid .full {
+          grid-column: auto;
+        }
+        .nav {
+          grid-template-columns: 1fr;
+        }
+        .search {
+          min-width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="login-screen" id="loginScreen">
+      <div class="login-panel">
+        <div class="brand">
+          <div class="mark">BF</div>
+          <div>
+            <h1>Boteco do França</h1>
+            <span>Acesso ao estoque</span>
+          </div>
+        </div>
+        <form class="login-form" id="loginForm">
+          <div class="field">
+            <label>Usuário</label>
+            <input name="username" autocomplete="username" required />
+          </div>
+          <div class="field">
+            <label>Senha</label>
+            <input
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+          <button class="btn primary">Entrar</button>
+        </form>
+        <div class="login-hint">
+          Primeiro acesso: usuário <strong>admin</strong> e senha
+          <strong>admin123</strong>. Depois altere os acessos na área
+          administrativa.
+        </div>
+      </div>
+      <div class="login-copy">
+        <h2>Controle seguro para o estoque trabalhar redondo.</h2>
+        <p>
+          Separe administradores e operadores, acompanhe movimentos e mantenha
+          as informações sensíveis nas mãos certas.
+        </p>
+      </div>
+    </section>
+
+    <div class="app auth-locked" id="appRoot">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="mark">BF</div>
+          <div>
+            <h1>Boteco do França</h1>
+            <span>Estoque, PVP e KPIs</span>
+          </div>
+          <button
+            class="btn icon mobile-menu"
+            id="menuBtn"
+            title="Menu"
+            aria-label="Menu"
+          >
+            <span class="ico"
+              ><svg viewBox="0 0 24 24">
+                <path d="M4 7h16M4 12h16M4 17h16" /></svg
+            ></span>
+          </button>
+        </div>
+        <nav class="nav" id="nav">
+          <button class="active" data-section="dashboard">
+            <span class="ico"
+              ><svg viewBox="0 0 24 24">
+                <path d="M4 13h7V4H4zM13 20h7V4h-7zM4 20h7v-5H4z" /></svg></span
+            >Dashboard
+          </button>
+          <button data-section="produtos">
+            <span class="ico"
+              ><svg viewBox="0 0 24 24">
+                <path
+                  d="M21 8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+                />
+                <path d="M3.3 7 12 12l8.7-5M12 22V12" /></svg></span
+            >Produtos
+          </button>
+          <button data-section="movimentos">
+            <span class="ico"
+              ><svg viewBox="0 0 24 24">
+                <path d="M7 7h10M7 12h10M7 17h10" />
+                <path d="M3 7h.01M3 12h.01M3 17h.01" /></svg></span
+            >Entradas e saídas
+          </button>
+          <button data-section="pvps">
+            <span class="ico"
+              ><svg viewBox="0 0 24 24">
+                <path
+                  d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"
+                /></svg></span
+            >PVPs e margens
+          </button>
+          <button data-section="relatorios">
+            <span class="ico"
+              ><svg viewBox="0 0 24 24">
+                <path d="M3 3v18h18" />
+                <path d="M7 15l4-4 3 3 5-7" /></svg></span
+            >Relatórios
+          </button>
+          <button data-section="acessos" data-admin-only="true">
+            <span class="ico"
+              ><svg viewBox="0 0 24 24">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg></span
+            >Acessos
+          </button>
+        </nav>
+        <div class="sidebar-footer">
+          Dados salvos neste navegador. Exporte o arquivo CSV/JSON para backup
+          do controle.
+        </div>
+      </aside>
+
+      <main class="main">
+        <header>
+          <div class="title">
+            <h2 id="pageTitle">Dashboard</h2>
+            <p id="pageSubtitle">
+              Visão geral do estoque, custos, vendas e alertas.
+            </p>
+          </div>
+          <div class="header-actions">
+            <div class="user-chip" id="currentUserChip">Usuário</div>
+            <button class="btn" id="backupBtn">
+              <span class="ico"
+                ><svg viewBox="0 0 24 24">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <path d="M7 10l5 5 5-5" />
+                  <path d="M12 15V3" /></svg></span
+              >Backup
+            </button>
+            <button class="btn" id="restoreBtn">
+              <span class="ico"
+                ><svg viewBox="0 0 24 24">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <path d="M17 8l-5-5-5 5" />
+                  <path d="M12 3v12" /></svg></span
+              >Restaurar
+            </button>
+            <button class="btn primary" id="quickMoveBtn">
+              <span class="ico"
+                ><svg viewBox="0 0 24 24">
+                  <path d="M12 5v14M5 12h14" /></svg></span
+              >Movimentar
+            </button>
+            <button class="btn" id="logoutBtn">
+              <span class="ico"
+                ><svg viewBox="0 0 24 24">
+                  <path d="M10 17l5-5-5-5" />
+                  <path d="M15 12H3" />
+                  <path d="M21 3v18" /></svg></span
+              >Sair
+            </button>
+            <input
+              type="file"
+              id="restoreInput"
+              accept="application/json"
+              hidden
+            />
+          </div>
+        </header>
+
+        <div class="content">
+          <section class="section active" id="dashboard">
+            <div class="grid kpis" id="kpiCards"></div>
+            <div class="split">
+              <div class="card">
+                <div class="panel-title">
+                  <h3>Movimento dos últimos 7 dias</h3>
+                  <span>Entradas x saídas em valor de custo</span>
+                </div>
+                <div class="chart">
+                  <div class="bars" id="bars"></div>
+                  <div class="legend">
+                    <span><i class="dot"></i>Entradas</span
+                    ><span><i class="dot out"></i>Saídas</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="panel-title">
+                  <h3>Alertas de gestão</h3>
+                  <span id="alertCount">0 itens</span>
+                </div>
+                <div class="list" id="alerts"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="panel-title">
+                <h3>Produtos críticos</h3>
+                <span>Estoque baixo, ruptura ou validade próxima</span>
+              </div>
+              <div class="table-wrap"><table id="criticalTable"></table></div>
+            </div>
+          </section>
+
+          <section class="section" id="produtos">
+            <div class="toolbar">
+              <div class="filters">
+                <input
+                  class="search"
+                  id="productSearch"
+                  placeholder="Buscar por produto, categoria ou fornecedor"
+                />
+                <select id="categoryFilter"></select>
+                <select id="statusFilter">
+                  <option value="">Todos os status</option>
+                  <option value="ok">Estoque ok</option>
+                  <option value="baixo">Estoque baixo</option>
+                  <option value="ruptura">Ruptura</option>
+                </select>
+              </div>
+              <button class="btn primary" id="newProductBtn">
+                <span class="ico"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12h14" /></svg></span
+                >Novo produto
+              </button>
+            </div>
+            <div class="card">
+              <div class="table-wrap"><table id="productTable"></table></div>
+            </div>
+            <div class="card">
+              <div class="panel-title">
+                <h3>Lotes ativos por validade</h3>
+                <span
+                  >Ordem PEPS por vencimento: primeiro que vence, primeiro que
+                  sai</span
+                >
+              </div>
+              <div class="table-wrap"><table id="batchTable"></table></div>
+            </div>
+          </section>
+
+          <section class="section" id="movimentos">
+            <div class="toolbar">
+              <div class="filters">
+                <input
+                  class="search"
+                  id="movementSearch"
+                  placeholder="Buscar produto, motivo ou responsável"
+                />
+                <select id="movementTypeFilter">
+                  <option value="">Todos os tipos</option>
+                  <option value="entrada">Entradas</option>
+                  <option value="saida">Saídas</option>
+                </select>
+              </div>
+              <button class="btn primary" id="newMovementBtn">
+                <span class="ico"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12h14" /></svg></span
+                >Registrar
+              </button>
+            </div>
+            <div class="card">
+              <div class="table-wrap"><table id="movementTable"></table></div>
+            </div>
+          </section>
+
+          <section class="section" id="pvps">
+            <div class="card">
+              <div class="panel-title">
+                <h3>Precificação e margem</h3>
+                <span>Compare custo, PVP, margem e preço sugerido</span>
+              </div>
+              <div class="table-wrap"><table id="pvpTable"></table></div>
+            </div>
+          </section>
+
+          <section class="section" id="relatorios">
+            <div class="grid kpis" id="reportCards"></div>
+            <div class="split">
+              <div class="card">
+                <div class="panel-title">
+                  <h3>Resumo por categoria</h3>
+                  <span>Valor imobilizado e cobertura</span>
+                </div>
+                <div class="table-wrap"><table id="categoryTable"></table></div>
+              </div>
+              <div class="card">
+                <div class="panel-title">
+                  <h3>Exportações</h3>
+                  <span>Arquivos para conferência externa</span>
+                </div>
+                <div class="list">
+                  <button class="btn" id="csvProductsBtn">
+                    <span class="ico"
+                      ><svg viewBox="0 0 24 24">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <path d="M7 10l5 5 5-5" />
+                        <path d="M12 15V3" /></svg></span
+                    >Exportar produtos CSV
+                  </button>
+                  <button class="btn" id="csvMovesBtn">
+                    <span class="ico"
+                      ><svg viewBox="0 0 24 24">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <path d="M7 10l5 5 5-5" />
+                        <path d="M12 15V3" /></svg></span
+                    >Exportar movimentos CSV
+                  </button>
+                  <button class="btn danger" id="resetBtn">
+                    <span class="ico"
+                      ><svg viewBox="0 0 24 24">
+                        <path d="M3 6h18" />
+                        <path d="M8 6V4h8v2" />
+                        <path d="M19 6l-1 14H6L5 6" />
+                        <path d="M10 11v6M14 11v6" /></svg></span
+                    >Reiniciar demonstração
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section" id="acessos">
+            <div class="toolbar">
+              <div>
+                <h3 style="margin: 0">Usuários autorizados</h3>
+                <p
+                  style="margin: 5px 0 0; color: var(--muted); font-size: 14px"
+                >
+                  Administradores gerenciam tudo. Operadores registram produtos
+                  e movimentos.
+                </p>
+              </div>
+              <button class="btn primary" id="newUserBtn">
+                <span class="ico"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12h14" /></svg></span
+                >Novo usuário
+              </button>
+            </div>
+            <div class="card">
+              <div class="user-list" id="userList"></div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div
+      class="modal-backdrop"
+      id="modalBackdrop"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="modal">
+        <header>
+          <div><h3 id="modalTitle">Cadastro</h3></div>
+          <button
+            class="btn icon"
+            id="closeModal"
+            title="Fechar"
+            aria-label="Fechar"
+          >
+            <span class="ico"
+              ><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12" /></svg
+            ></span>
+          </button>
+        </header>
+        <form id="modalForm"></form>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const STORE_KEY = "boteco-franca-estoque-v1";
+      const SESSION_KEY = "boteco-franca-usuario-atual";
+      const currency = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      });
+      const number = new Intl.NumberFormat("pt-BR", {
+        maximumFractionDigits: 2,
+      });
+      const todayISO = () => new Date().toISOString().slice(0, 10);
+      const uid = () =>
+        crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(Date.now() + Math.random());
+
+      const seed = {
+        products: [
+          {
+            id: uid(),
+            name: "Cerveja long neck",
+            category: "Bebidas",
+            unit: "un",
+            supplier: "Distribuidora Central",
+            stock: 84,
+            min: 36,
+            max: 180,
+            cost: 4.8,
+            pvp: 10,
+            loss: 1.5,
+            expiry: "2026-09-10",
+          },
+          {
+            id: uid(),
+            name: "Chopp claro",
+            category: "Bebidas",
+            unit: "L",
+            supplier: "Cervejaria França",
+            stock: 58,
+            min: 40,
+            max: 140,
+            cost: 7.2,
+            pvp: 15,
+            loss: 3,
+            expiry: "2026-07-02",
+          },
+          {
+            id: uid(),
+            name: "Refrigerante lata",
+            category: "Bebidas",
+            unit: "un",
+            supplier: "Bebidas Lopes",
+            stock: 21,
+            min: 30,
+            max: 120,
+            cost: 3.1,
+            pvp: 7,
+            loss: 1,
+            expiry: "2026-12-12",
+          },
+          {
+            id: uid(),
+            name: "Carne de sol",
+            category: "Cozinha",
+            unit: "kg",
+            supplier: "Açougue Prime",
+            stock: 11,
+            min: 8,
+            max: 35,
+            cost: 38,
+            pvp: 82,
+            loss: 8,
+            expiry: "2026-06-22",
+          },
+          {
+            id: uid(),
+            name: "Batata palito",
+            category: "Cozinha",
+            unit: "kg",
+            supplier: "Hortifruti Sul",
+            stock: 17,
+            min: 15,
+            max: 60,
+            cost: 9.5,
+            pvp: 28,
+            loss: 12,
+            expiry: "2026-07-20",
+          },
+          {
+            id: uid(),
+            name: "Óleo de soja",
+            category: "Insumos",
+            unit: "L",
+            supplier: "Atacadão",
+            stock: 6,
+            min: 8,
+            max: 28,
+            cost: 6.9,
+            pvp: 0,
+            loss: 0,
+            expiry: "2027-01-14",
+          },
+          {
+            id: uid(),
+            name: "Guardanapo",
+            category: "Descartáveis",
+            unit: "pct",
+            supplier: "Embalagens Rei",
+            stock: 12,
+            min: 10,
+            max: 45,
+            cost: 4.2,
+            pvp: 0,
+            loss: 0,
+            expiry: "",
+          },
+          {
+            id: uid(),
+            name: "Limão tahiti",
+            category: "Hortifruti",
+            unit: "kg",
+            supplier: "Feira Nova",
+            stock: 4,
+            min: 6,
+            max: 22,
+            cost: 5.3,
+            pvp: 0,
+            loss: 10,
+            expiry: "2026-06-19",
+          },
+        ],
+        movements: [],
+        batches: [],
+        users: [
+          {
+            id: uid(),
+            name: "Administrador",
+            username: "admin",
+            password: "admin123",
+            role: "admin",
+            active: true,
+          },
+          {
+            id: uid(),
+            name: "Operador",
+            username: "operador",
+            password: "operador123",
+            role: "operador",
+            active: true,
+          },
+        ],
+      };
+
+      seed.movements = [
+        moveSeed(
+          seed.products[0],
+          "entrada",
+          48,
+          4.7,
+          "Compra semanal",
+          "França",
+          -6,
+        ),
+        moveSeed(
+          seed.products[1],
+          "saida",
+          22,
+          7.2,
+          "Venda balcão",
+          "Caixa",
+          -1,
+        ),
+        moveSeed(
+          seed.products[3],
+          "saida",
+          5,
+          38,
+          "Produção cozinha",
+          "Cozinha",
+          -2,
+        ),
+        moveSeed(
+          seed.products[4],
+          "entrada",
+          20,
+          9.4,
+          "Reposição",
+          "França",
+          -3,
+        ),
+        moveSeed(
+          seed.products[2],
+          "saida",
+          16,
+          3.1,
+          "Venda salão",
+          "Caixa",
+          -4,
+        ),
+        moveSeed(
+          seed.products[5],
+          "saida",
+          3,
+          6.9,
+          "Uso cozinha",
+          "Cozinha",
+          -5,
+        ),
+      ];
+
+      seed.batches = seed.products
+        .filter((p) => p.stock > 0)
+        .map((p) => ({
+          id: uid(),
+          productId: p.id,
+          code: "Inicial",
+          qty: p.stock,
+          remaining: p.stock,
+          unitCost: p.cost,
+          expiry: p.expiry || "",
+          entryDate: todayISO(),
+        }));
+
+      function moveSeed(
+        product,
+        type,
+        qty,
+        unitCost,
+        reason,
+        person,
+        dayOffset,
+      ) {
+        const d = new Date();
+        d.setDate(d.getDate() + dayOffset);
+        return {
+          id: uid(),
+          productId: product.id,
+          type,
+          qty,
+          unitCost,
+          reason,
+          person,
+          date: d.toISOString().slice(0, 10),
+          expiry: product.expiry || "",
+          batchCode: "Inicial",
+          batchesUsed: [],
+          note: "",
+        };
+      }
+
+      let state = loadState();
+      let currentSection = "dashboard";
+      let editingProductId = null;
+      let currentUser = null;
+      let editingUserId = null;
+
+      const titles = {
+        dashboard: [
+          "Dashboard",
+          "Visão geral do estoque, custos, vendas e alertas.",
+        ],
+        produtos: [
+          "Produtos",
+          "Cadastro completo com mínimo, máximo, custo, PVP e validade.",
+        ],
+        movimentos: [
+          "Entradas e saídas",
+          "Registre compras, consumo, perdas, vendas e ajustes.",
+        ],
+        pvps: [
+          "PVPs e margens",
+          "Acompanhe markup, margem bruta e preço sugerido.",
+        ],
+        relatorios: [
+          "Relatórios",
+          "Resumo financeiro, cobertura e exportação dos dados.",
+        ],
+        acessos: [
+          "Acessos",
+          "Controle quem pode entrar e o que cada pessoa pode fazer.",
+        ],
+      };
+
+      const icons = {
+        edit: '<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+        trash:
+          '<svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>',
+      };
+
+      function loadState() {
+        const raw = localStorage.getItem(STORE_KEY);
+        if (!raw) {
+          localStorage.setItem(STORE_KEY, JSON.stringify(seed));
+          return structuredClone(seed);
+        }
+        try {
+          return migrateState(JSON.parse(raw));
+        } catch {
+          localStorage.setItem(STORE_KEY, JSON.stringify(seed));
+          return structuredClone(seed);
+        }
+      }
+
+      function migrateState(data) {
+        data.products = Array.isArray(data.products) ? data.products : [];
+        data.movements = Array.isArray(data.movements) ? data.movements : [];
+        data.batches = Array.isArray(data.batches)
+          ? data.batches
+          : data.products
+              .filter((p) => Number(p.stock) > 0)
+              .map((p) => ({
+                id: uid(),
+                productId: p.id,
+                code: "Migrado",
+                qty: Number(p.stock) || 0,
+                remaining: Number(p.stock) || 0,
+                unitCost: Number(p.cost) || 0,
+                expiry: p.expiry || "",
+                entryDate: todayISO(),
+              }));
+        data.users =
+          Array.isArray(data.users) && data.users.length
+            ? data.users
+            : structuredClone(seed.users);
+        data.users = data.users.map((u) => ({
+          id: u.id || uid(),
+          name: u.name || u.username || "Usuário",
+          username: u.username || "",
+          password: u.password || "123456",
+          role: u.role === "admin" ? "admin" : "operador",
+          active: u.active !== false,
+        }));
+        localStorage.setItem(STORE_KEY, JSON.stringify(data));
+        return data;
+      }
+
+      function saveState() {
+        localStorage.setItem(STORE_KEY, JSON.stringify(state));
+        renderAll();
+      }
+
+      function isAdmin() {
+        return currentUser?.role === "admin";
+      }
+
+      function findUser(username, password) {
+        return state.users.find(
+          (u) =>
+            u.active &&
+            u.username.toLowerCase() === username.toLowerCase() &&
+            u.password === password,
+        );
+      }
+
+      function initAuth() {
+        const userId = sessionStorage.getItem(SESSION_KEY);
+        currentUser =
+          state.users.find((u) => u.id === userId && u.active) || null;
+        if (currentUser) showApp();
+        else showLogin();
+      }
+
+      function showLogin() {
+        document.getElementById("loginScreen").classList.remove("hidden");
+        document.getElementById("appRoot").classList.add("auth-locked");
+      }
+
+      function showApp() {
+        document.getElementById("loginScreen").classList.add("hidden");
+        document.getElementById("appRoot").classList.remove("auth-locked");
+        applyPermissions();
+        renderAll();
+      }
+
+      function applyPermissions() {
+        document.getElementById("currentUserChip").textContent =
+          `${currentUser.name} | ${currentUser.role === "admin" ? "Administrador" : "Operador"}`;
+        document.querySelectorAll("[data-admin-only]").forEach((el) => {
+          el.style.display = isAdmin() ? "" : "none";
+        });
+        document.getElementById("backupBtn").style.display = isAdmin()
+          ? ""
+          : "none";
+        document.getElementById("restoreBtn").style.display = isAdmin()
+          ? ""
+          : "none";
+        document.getElementById("resetBtn").style.display = isAdmin()
+          ? ""
+          : "none";
+        if (!isAdmin() && currentSection === "acessos")
+          switchSection("dashboard");
+      }
+
+      function login(username, password) {
+        const user = findUser(username, password);
+        if (!user) return toast("Usuário ou senha inválidos.");
+        currentUser = user;
+        sessionStorage.setItem(SESSION_KEY, user.id);
+        showApp();
+        toast(`Bem-vindo, ${user.name}.`);
+      }
+
+      function logout() {
+        currentUser = null;
+        sessionStorage.removeItem(SESSION_KEY);
+        showLogin();
+        toast("Sessão encerrada.");
+      }
+
+      function productById(id) {
+        return state.products.find((p) => p.id === id);
+      }
+
+      function statusOf(product) {
+        if (product.stock <= 0) return "ruptura";
+        if (product.stock <= product.min) return "baixo";
+        return "ok";
+      }
+
+      function activeBatches(productId) {
+        return state.batches
+          .filter((b) => b.productId === productId && Number(b.remaining) > 0)
+          .sort((a, b) => {
+            if (!a.expiry && !b.expiry)
+              return a.entryDate.localeCompare(b.entryDate);
+            if (!a.expiry) return 1;
+            if (!b.expiry) return -1;
+            return (
+              a.expiry.localeCompare(b.expiry) ||
+              a.entryDate.localeCompare(b.entryDate)
+            );
+          });
+      }
+
+      function nextBatch(product) {
+        return activeBatches(product.id)[0] || null;
+      }
+
+      function expiryStatus(product) {
+        const batch = nextBatch(product);
+        if (!batch?.expiry) return "";
+        const days = Math.ceil(
+          (new Date(batch.expiry) - new Date(todayISO())) / 86400000,
+        );
+        if (days < 0) return "Vencido";
+        if (days <= 7) return `Vence em ${days} dia(s)`;
+        if (days <= 30) return `Vence em ${days} dias`;
+        return "";
+      }
+
+      function nextExpiryLabel(product) {
+        const batch = nextBatch(product);
+        if (!batch?.expiry) return "-";
+        const status = expiryStatus(product);
+        return `${dateBR(batch.expiry)}${status ? ` | ${status}` : ""}`;
+      }
+
+      function stockValue() {
+        return state.products.reduce((sum, p) => sum + p.stock * p.cost, 0);
+      }
+
+      function salesValue() {
+        return state.movements.reduce((sum, m) => {
+          const p = productById(m.productId);
+          return sum + (m.type === "saida" && p ? m.qty * p.pvp : 0);
+        }, 0);
+      }
+
+      function costOutValue() {
+        return state.movements.reduce(
+          (sum, m) => sum + (m.type === "saida" ? m.qty * m.unitCost : 0),
+          0,
+        );
+      }
+
+      function marginPct(product) {
+        if (!product.pvp) return 0;
+        return ((product.pvp - product.cost) / product.pvp) * 100;
+      }
+
+      function suggestedPrice(product) {
+        const targetMargin = 0.62;
+        const adjustedCost =
+          product.cost * (1 + (Number(product.loss) || 0) / 100);
+        return adjustedCost / (1 - targetMargin);
+      }
+
+      function coverageDays(product) {
+        const recent = state.movements.filter(
+          (m) => m.productId === product.id && m.type === "saida",
+        );
+        const total = recent.reduce((sum, m) => sum + m.qty, 0);
+        const days = Math.max(7, daysBetween(recent));
+        const daily = total / days;
+        if (!daily) return Infinity;
+        return product.stock / daily;
+      }
+
+      function daysBetween(moves) {
+        if (!moves.length) return 7;
+        const dates = moves.map((m) => new Date(m.date).getTime());
+        return Math.max(
+          1,
+          Math.ceil((Math.max(...dates) - Math.min(...dates)) / 86400000) + 1,
+        );
+      }
+
+      function renderAll() {
+        renderCategories();
+        renderDashboard();
+        renderProducts();
+        renderBatches();
+        renderMovements();
+        renderPvps();
+        renderReports();
+        renderUsers();
+      }
+
+      function renderDashboard() {
+        const low = state.products.filter((p) => statusOf(p) !== "ok").length;
+        const expiring = state.products.filter((p) => expiryStatus(p)).length;
+        const margin = salesValue()
+          ? ((salesValue() - costOutValue()) / salesValue()) * 100
+          : 0;
+        document.getElementById("kpiCards").innerHTML = [
+          metric(
+            "Valor em estoque",
+            currency.format(stockValue()),
+            `${state.products.length} produtos cadastrados`,
+            "brand",
+          ),
+          metric(
+            "Itens críticos",
+            String(low),
+            "Produtos abaixo do mínimo ou em ruptura",
+            "danger",
+          ),
+          metric(
+            "Margem bruta",
+            `${number.format(margin)}%`,
+            "Com base nas saídas registradas",
+            "ok",
+          ),
+          metric(
+            "Validade próxima",
+            String(expiring),
+            "Itens vencidos ou a vencer em até 30 dias",
+            "gold",
+          ),
+        ].join("");
+
+        renderBars();
+        renderAlerts();
+        renderCriticalTable();
+      }
+
+      function metric(label, value, desc, color) {
+        const stroke =
+          color === "danger"
+            ? "var(--danger)"
+            : color === "gold"
+              ? "var(--gold)"
+              : color === "ok"
+                ? "var(--ok)"
+                : "var(--brand)";
+        return `<article class="card metric"><div class="top"><span>${label}</span><span class="ico" style="color:${stroke}"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15l3-3 3 2 4-7"/></svg></span></div><strong>${value}</strong><small>${desc}</small></article>`;
+      }
+
+      function renderBars() {
+        const days = [...Array(7)].map((_, i) => {
+          const d = new Date();
+          d.setDate(d.getDate() - (6 - i));
+          return d.toISOString().slice(0, 10);
+        });
+        const rows = days.flatMap((date) => {
+          const entry = sumDay(date, "entrada");
+          const out = sumDay(date, "saida");
+          return [
+            { date, type: "in", value: entry },
+            { date, type: "out", value: out },
+          ];
+        });
+        const max = Math.max(1, ...rows.map((r) => r.value));
+        document.getElementById("bars").innerHTML = rows
+          .map((r) => {
+            const h = Math.max(5, (r.value / max) * 175);
+            const label = new Date(r.date + "T00:00:00").toLocaleDateString(
+              "pt-BR",
+              { day: "2-digit", month: "2-digit" },
+            );
+            return `<div class="bar ${r.type === "out" ? "out" : ""}" style="height:${h}px"><span>${label}</span></div>`;
+          })
+          .join("");
+      }
+
+      function sumDay(date, type) {
+        return state.movements
+          .filter((m) => m.date === date && m.type === type)
+          .reduce((sum, m) => sum + m.qty * m.unitCost, 0);
+      }
+
+      function renderAlerts() {
+        const alerts = [];
+        state.products.forEach((p) => {
+          const st = statusOf(p);
+          if (st === "ruptura")
+            alerts.push([
+              p.name,
+              "Sem estoque disponível para operação.",
+              "bad",
+            ]);
+          if (st === "baixo")
+            alerts.push([
+              p.name,
+              `Estoque atual ${number.format(p.stock)} ${p.unit}, mínimo ${number.format(p.min)}.`,
+              "warn",
+            ]);
+          if (p.pvp && marginPct(p) < 45)
+            alerts.push([
+              p.name,
+              `Margem baixa: ${number.format(marginPct(p))}%.`,
+              "info",
+            ]);
+        });
+        state.batches
+          .map((b) => ({ ...b, product: productById(b.productId) }))
+          .filter((b) => b.product && Number(b.remaining) > 0 && b.expiry)
+          .forEach((b) => {
+            const days = Math.ceil(
+              (new Date(b.expiry) - new Date(todayISO())) / 86400000,
+            );
+            if (days < 0)
+              alerts.push([
+                b.product.name,
+                `Lote ${b.code || "-"} vencido em ${dateBR(b.expiry)}.`,
+                "bad",
+              ]);
+            else if (days <= 30)
+              alerts.push([
+                b.product.name,
+                `Lote ${b.code || "-"} vence em ${days} dia(s). Saldo: ${number.format(b.remaining)} ${b.product.unit}.`,
+                days <= 7 ? "bad" : "warn",
+              ]);
+          });
+        document.getElementById("alertCount").textContent =
+          `${alerts.length} itens`;
+        document.getElementById("alerts").innerHTML = alerts.length
+          ? alerts
+              .slice(0, 8)
+              .map(
+                (a) =>
+                  `<div class="alert"><strong>${a[0]}</strong><span>${a[1]}</span></div>`,
+              )
+              .join("")
+          : `<div class="empty">Nenhum alerta ativo no momento.</div>`;
+      }
+
+      function renderCriticalTable() {
+        const rows = state.products
+          .filter((p) => statusOf(p) !== "ok" || expiryStatus(p))
+          .sort((a, b) => a.stock - b.stock);
+        renderTable(
+          "criticalTable",
+          [
+            "Produto",
+            "Categoria",
+            "Estoque",
+            "Mínimo",
+            "Status",
+            "Próxima validade",
+          ],
+          rows.map((p) => [
+            p.name,
+            p.category,
+            `${number.format(p.stock)} ${p.unit}`,
+            `${number.format(p.min)} ${p.unit}`,
+            statusBadge(p),
+            nextExpiryLabel(p),
+          ]),
+        );
+      }
+
+      function renderCategories() {
+        const selected = document.getElementById("categoryFilter").value;
+        const cats = [
+          ...new Set(state.products.map((p) => p.category).filter(Boolean)),
+        ].sort();
+        document.getElementById("categoryFilter").innerHTML =
+          `<option value="">Todas as categorias</option>` +
+          cats.map((c) => `<option>${c}</option>`).join("");
+        if (cats.includes(selected))
+          document.getElementById("categoryFilter").value = selected;
+      }
+
+      function renderProducts() {
+        const q = document.getElementById("productSearch").value.toLowerCase();
+        const cat = document.getElementById("categoryFilter").value;
+        const st = document.getElementById("statusFilter").value;
+        const rows = state.products
+          .filter(
+            (p) =>
+              !q ||
+              [p.name, p.category, p.supplier]
+                .join(" ")
+                .toLowerCase()
+                .includes(q),
+          )
+          .filter((p) => !cat || p.category === cat)
+          .filter((p) => !st || statusOf(p) === st)
+          .sort((a, b) => a.name.localeCompare(b.name));
+        renderTable(
+          "productTable",
+          [
+            "Produto",
+            "Categoria",
+            "Estoque",
+            "Mín./Máx.",
+            "Próxima validade",
+            "Custo",
+            "PVP",
+            "Status",
+            "Ações",
+          ],
+          rows.map((p) => [
+            `<strong>${p.name}</strong><br><span style="color:var(--muted);font-size:12px">${p.supplier || "-"}</span>`,
+            p.category,
+            `${number.format(p.stock)} ${p.unit}`,
+            `${number.format(p.min)} / ${number.format(p.max)} ${p.unit}`,
+            nextExpiryLabel(p),
+            currency.format(p.cost),
+            p.pvp ? currency.format(p.pvp) : "-",
+            statusBadge(p),
+            `<div class="action-row"><button class="btn icon" title="Editar" onclick="openProductModal('${p.id}')"><span class="ico">${icons.edit}</span></button>${isAdmin() ? `<button class="btn icon danger" title="Excluir" onclick="deleteProduct('${p.id}')"><span class="ico">${icons.trash}</span></button>` : ""}</div>`,
+          ]),
+        );
+      }
+
+      function renderBatches() {
+        const q = document.getElementById("productSearch").value.toLowerCase();
+        const cat = document.getElementById("categoryFilter").value;
+        const rows = state.batches
+          .map((b) => ({ ...b, product: productById(b.productId) }))
+          .filter((b) => b.product && Number(b.remaining) > 0)
+          .filter(
+            (b) =>
+              !q ||
+              [b.product.name, b.product.category, b.product.supplier, b.code]
+                .join(" ")
+                .toLowerCase()
+                .includes(q),
+          )
+          .filter((b) => !cat || b.product.category === cat)
+          .sort((a, b) => {
+            if (!a.expiry && !b.expiry)
+              return a.product.name.localeCompare(b.product.name);
+            if (!a.expiry) return 1;
+            if (!b.expiry) return -1;
+            return (
+              a.expiry.localeCompare(b.expiry) ||
+              a.product.name.localeCompare(b.product.name)
+            );
+          });
+        renderTable(
+          "batchTable",
+          [
+            "Produto",
+            "Lote/NF",
+            "Entrada",
+            "Validade",
+            "Qtd. inicial",
+            "Qtd. atual",
+            "Status",
+          ],
+          rows.map((b) => [
+            b.product.name,
+            b.code || "-",
+            dateBR(b.entryDate),
+            b.expiry ? dateBR(b.expiry) : "-",
+            `${number.format(b.qty)} ${b.product.unit}`,
+            `${number.format(b.remaining)} ${b.product.unit}`,
+            batchStatusBadge(b),
+          ]),
+        );
+      }
+
+      function batchStatusBadge(batch) {
+        if (!batch.expiry) return `<span class="pill dark">Sem validade</span>`;
+        const days = Math.ceil(
+          (new Date(batch.expiry) - new Date(todayISO())) / 86400000,
+        );
+        if (days < 0) return `<span class="pill bad">Vencido</span>`;
+        if (days <= 7)
+          return `<span class="pill bad">Vence em ${days} dia(s)</span>`;
+        if (days <= 30)
+          return `<span class="pill warn">Vence em ${days} dias</span>`;
+        return `<span class="pill ok">Ok</span>`;
+      }
+
+      function renderMovements() {
+        const q = document.getElementById("movementSearch").value.toLowerCase();
+        const type = document.getElementById("movementTypeFilter").value;
+        const rows = state.movements
+          .map((m) => ({ ...m, product: productById(m.productId) }))
+          .filter((m) => m.product)
+          .filter((m) => !type || m.type === type)
+          .filter(
+            (m) =>
+              !q ||
+              [m.product.name, m.reason, m.person, m.note]
+                .join(" ")
+                .toLowerCase()
+                .includes(q),
+          )
+          .sort((a, b) => b.date.localeCompare(a.date));
+        renderTable(
+          "movementTable",
+          [
+            "Data",
+            "Tipo",
+            "Produto",
+            "Qtd.",
+            "Validade/lote",
+            "Custo un.",
+            "Total",
+            "Motivo",
+            "Responsável",
+          ],
+          rows.map((m) => [
+            dateBR(m.date),
+            `<span class="pill ${m.type === "entrada" ? "ok" : "bad"}">${m.type}</span>`,
+            m.product.name,
+            `${number.format(m.qty)} ${m.product.unit}`,
+            movementBatchLabel(m),
+            currency.format(m.unitCost),
+            currency.format(m.qty * m.unitCost),
+            m.reason || "-",
+            m.person || "-",
+          ]),
+        );
+      }
+
+      function movementBatchLabel(movement) {
+        if (movement.type === "entrada") {
+          const parts = [];
+          if (movement.batchCode) parts.push(movement.batchCode);
+          if (movement.expiry) parts.push(dateBR(movement.expiry));
+          return parts.join(" | ") || "-";
+        }
+        if (
+          Array.isArray(movement.batchesUsed) &&
+          movement.batchesUsed.length
+        ) {
+          return movement.batchesUsed
+            .map(
+              (b) =>
+                `${b.code || "Lote"}: ${number.format(b.qty)}${b.expiry ? ` (${dateBR(b.expiry)})` : ""}`,
+            )
+            .join("<br>");
+        }
+        return movement.expiry ? dateBR(movement.expiry) : "-";
+      }
+
+      function consumeFefo(product, qty) {
+        let remaining = qty;
+        const used = [];
+        for (const batch of activeBatches(product.id)) {
+          if (remaining <= 0) break;
+          const take = Math.min(Number(batch.remaining) || 0, remaining);
+          if (take <= 0) continue;
+          batch.remaining = Number((batch.remaining - take).toFixed(3));
+          remaining = Number((remaining - take).toFixed(3));
+          used.push({
+            batchId: batch.id,
+            code: batch.code,
+            expiry: batch.expiry,
+            qty: take,
+          });
+        }
+        if (remaining > 0) throw new Error("Estoque por lote insuficiente.");
+        return used;
+      }
+
+      function renderPvps() {
+        const rows = state.products
+          .filter((p) => p.pvp > 0)
+          .sort((a, b) => marginPct(a) - marginPct(b));
+        renderTable(
+          "pvpTable",
+          [
+            "Produto",
+            "Custo ajustado",
+            "PVP atual",
+            "Markup",
+            "Margem",
+            "PVP sugerido",
+            "Leitura",
+          ],
+          rows.map((p) => {
+            const adjusted = p.cost * (1 + (Number(p.loss) || 0) / 100);
+            const suggested = suggestedPrice(p);
+            const margin = marginPct(p);
+            return [
+              p.name,
+              currency.format(adjusted),
+              currency.format(p.pvp),
+              `${number.format(p.pvp / adjusted)}x`,
+              `${number.format(margin)}%`,
+              currency.format(suggested),
+              margin < 45
+                ? `<span class="pill warn">Rever preço</span>`
+                : `<span class="pill ok">Saudável</span>`,
+            ];
+          }),
+        );
+      }
+
+      function renderReports() {
+        const entries = state.movements
+          .filter((m) => m.type === "entrada")
+          .reduce((s, m) => s + m.qty * m.unitCost, 0);
+        const outs = costOutValue();
+        const avgCoverage = finiteAverage(state.products.map(coverageDays));
+        document.getElementById("reportCards").innerHTML = [
+          metric(
+            "Entradas registradas",
+            currency.format(entries),
+            "Compras e ajustes positivos",
+            "brand",
+          ),
+          metric(
+            "Saídas a custo",
+            currency.format(outs),
+            "Consumo, perdas e vendas",
+            "danger",
+          ),
+          metric(
+            "Receita estimada",
+            currency.format(salesValue()),
+            "Saídas com PVP cadastrado",
+            "ok",
+          ),
+          metric(
+            "Cobertura média",
+            `${number.format(avgCoverage)} dias`,
+            "Baseada nas saídas registradas",
+            "gold",
+          ),
+        ].join("");
+
+        const grouped = new Map();
+        state.products.forEach((p) => {
+          const row = grouped.get(p.category) || {
+            count: 0,
+            value: 0,
+            low: 0,
+            coverage: [],
+          };
+          row.count += 1;
+          row.value += p.stock * p.cost;
+          row.low += statusOf(p) === "ok" ? 0 : 1;
+          row.coverage.push(coverageDays(p));
+          grouped.set(p.category, row);
+        });
+        const rows = [...grouped.entries()].sort(
+          (a, b) => b[1].value - a[1].value,
+        );
+        renderTable(
+          "categoryTable",
+          [
+            "Categoria",
+            "Produtos",
+            "Valor em estoque",
+            "Itens críticos",
+            "Cobertura média",
+          ],
+          rows.map(([cat, r]) => [
+            cat,
+            r.count,
+            currency.format(r.value),
+            r.low,
+            `${number.format(finiteAverage(r.coverage))} dias`,
+          ]),
+        );
+      }
+
+      function renderUsers() {
+        const el = document.getElementById("userList");
+        if (!el) return;
+        el.innerHTML = state.users
+          .map(
+            (u) => `
+        <article class="user-card">
+          <div>
+            <strong>${u.name}</strong>
+            <span style="display:block">@${u.username}</span>
+          </div>
+          <div>
+            <span class="pill ${u.role === "admin" ? "info" : "dark"}">${u.role === "admin" ? "Administrador" : "Operador"}</span>
+            <span class="pill ${u.active ? "ok" : "bad"}">${u.active ? "Ativo" : "Inativo"}</span>
+          </div>
+          <div class="action-row">
+            <button class="btn" onclick="openUserModal('${u.id}')"><span class="ico">${icons.edit}</span>Editar</button>
+            <button class="btn danger" ${u.id === currentUser?.id ? "disabled" : ""} onclick="deleteUser('${u.id}')"><span class="ico">${icons.trash}</span>Excluir</button>
+          </div>
+        </article>
+      `,
+          )
+          .join("");
+      }
+
+      function finiteAverage(values) {
+        const finite = values.filter((v) => Number.isFinite(v));
+        if (!finite.length) return 0;
+        return finite.reduce((s, v) => s + v, 0) / finite.length;
+      }
+
+      function statusBadge(product) {
+        const st = statusOf(product);
+        if (st === "ruptura") return `<span class="pill bad">Ruptura</span>`;
+        if (st === "baixo") return `<span class="pill warn">Baixo</span>`;
+        return `<span class="pill ok">Ok</span>`;
+      }
+
+      function renderTable(id, headers, rows) {
+        const el = document.getElementById(id);
+        if (!rows.length) {
+          el.innerHTML = `<tbody><tr><td class="empty">Nenhum registro encontrado.</td></tr></tbody>`;
+          return;
+        }
+        el.innerHTML = `<thead><tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody>`;
+      }
+
+      function dateBR(iso) {
+        if (!iso) return "-";
+        return new Date(iso + "T00:00:00").toLocaleDateString("pt-BR");
+      }
+
+      function openProductModal(id = null) {
+        editingProductId = id;
+        const p = id
+          ? productById(id)
+          : {
+              name: "",
+              category: "",
+              unit: "un",
+              supplier: "",
+              stock: 0,
+              min: 0,
+              max: 0,
+              cost: 0,
+              pvp: 0,
+              loss: 0,
+              expiry: "",
+            };
+        openModal(
+          id ? "Editar produto" : "Novo produto",
+          `
+        <div class="form-grid">
+          ${field("name", "Produto", p.name, "text", "wide", true)}
+          ${field("category", "Categoria", p.category, "text", "", true)}
+          ${field("unit", "Unidade", p.unit, "text", "", true)}
+          ${field("supplier", "Fornecedor", p.supplier, "text", "wide")}
+          ${field("stock", "Estoque atual", p.stock, "number", "", true, "0.01")}
+          ${field("min", "Estoque mínimo", p.min, "number", "", true, "0.01")}
+          ${field("max", "Estoque máximo", p.max, "number", "", true, "0.01")}
+          ${field("cost", "Custo unitário", p.cost, "number", "", true, "0.01")}
+          ${field("pvp", "PVP", p.pvp, "number", "", false, "0.01")}
+          ${field("loss", "Perda técnica (%)", p.loss, "number", "", false, "0.01")}
+          ${field("expiry", "Validade", p.expiry, "date")}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" onclick="closeModal()">Cancelar</button>
+          <button class="btn primary">Salvar produto</button>
+        </div>
+      `,
+          saveProductFromForm,
+        );
+      }
+
+      function openUserModal(id = null) {
+        if (!isAdmin())
+          return toast("Apenas administradores gerenciam acessos.");
+        editingUserId = id;
+        const u = id
+          ? state.users.find((user) => user.id === id)
+          : {
+              name: "",
+              username: "",
+              password: "",
+              role: "operador",
+              active: true,
+            };
+        openModal(
+          id ? "Editar usuário" : "Novo usuário",
+          `
+        <div class="form-grid">
+          ${field("name", "Nome", u.name, "text", "wide", true)}
+          ${field("username", "Usuário de login", u.username, "text", "", true)}
+          ${field("password", id ? "Nova senha" : "Senha", "", "password", "", !id)}
+          <div class="field">
+            <label>Perfil</label>
+            <select name="role" required>
+              <option value="operador" ${u.role === "operador" ? "selected" : ""}>Operador</option>
+              <option value="admin" ${u.role === "admin" ? "selected" : ""}>Administrador</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Status</label>
+            <select name="active">
+              <option value="true" ${u.active ? "selected" : ""}>Ativo</option>
+              <option value="false" ${!u.active ? "selected" : ""}>Inativo</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>Permissões do perfil</label>
+            <div class="login-hint">Administrador: backup, restauração, exclusões, reset e usuários. Operador: consulta, cadastro, edição e movimentação de estoque.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" onclick="closeModal()">Cancelar</button>
+          <button class="btn primary">Salvar acesso</button>
+        </div>
+      `,
+          saveUserFromForm,
+        );
+      }
+
+      function openMovementModal() {
+        openModal(
+          "Registrar entrada ou saída",
+          `
+        <div class="form-grid">
+          <div class="field wide"><label>Produto</label><select name="productId" required>${state.products
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map(
+              (p) =>
+                `<option value="${p.id}">${p.name} | estoque ${number.format(p.stock)} ${p.unit}</option>`,
+            )
+            .join("")}</select></div>
+          <div class="field"><label>Tipo</label><select name="type" required><option value="entrada">Entrada</option><option value="saida">Saída</option></select></div>
+          ${field("date", "Data", todayISO(), "date", "", true)}
+          ${field("qty", "Quantidade", 1, "number", "", true, "0.01")}
+          ${field("unitCost", "Custo unitário", "", "number", "", true, "0.01")}
+          ${field("batchCode", "Lote/NF", "", "text")}
+          ${field("expiry", "Validade do lote", "", "date")}
+          ${field("reason", "Motivo", "", "text", "wide", true)}
+          ${field("person", "Responsável", "", "text")}
+          <div class="field full"><label>Observação</label><textarea name="note" placeholder="Lote, NF, perda, ajuste, evento ou turno"></textarea></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" onclick="closeModal()">Cancelar</button>
+          <button class="btn primary">Registrar movimento</button>
+        </div>
+      `,
+          saveMovementFromForm,
+        );
+        const productSelect = document.querySelector("[name=productId]");
+        const unitCost = document.querySelector("[name=unitCost]");
+        const expiry = document.querySelector("[name=expiry]");
+        const syncCost = () => {
+          const product = productById(productSelect.value);
+          unitCost.value = product?.cost || 0;
+          expiry.value = nextBatch(product)?.expiry || "";
+        };
+        productSelect.addEventListener("change", syncCost);
+        syncCost();
+      }
+
+      function field(
+        name,
+        label,
+        value,
+        type = "text",
+        cls = "",
+        required = false,
+        step = "",
+      ) {
+        return `<div class="field ${cls}"><label>${label}</label><input name="${name}" type="${type}" value="${value ?? ""}" ${required ? "required" : ""} ${step ? `step="${step}"` : ""}></div>`;
+      }
+
+      function openModal(title, body, submitHandler) {
+        document.getElementById("modalTitle").textContent = title;
+        const form = document.getElementById("modalForm");
+        form.innerHTML = body;
+        form.onsubmit = (e) => {
+          e.preventDefault();
+          submitHandler(new FormData(form));
+        };
+        document.getElementById("modalBackdrop").classList.add("open");
+        setTimeout(
+          () => form.querySelector("input,select,textarea")?.focus(),
+          30,
+        );
+      }
+
+      function closeModal() {
+        document.getElementById("modalBackdrop").classList.remove("open");
+        document.getElementById("modalForm").onsubmit = null;
+      }
+
+      function saveProductFromForm(data) {
+        const product = {
+          id: editingProductId || uid(),
+          name: data.get("name").trim(),
+          category: data.get("category").trim(),
+          unit: data.get("unit").trim(),
+          supplier: data.get("supplier").trim(),
+          stock: Number(data.get("stock")) || 0,
+          min: Number(data.get("min")) || 0,
+          max: Number(data.get("max")) || 0,
+          cost: Number(data.get("cost")) || 0,
+          pvp: Number(data.get("pvp")) || 0,
+          loss: Number(data.get("loss")) || 0,
+          expiry: data.get("expiry"),
+        };
+        if (editingProductId) {
+          state.products = state.products.map((p) =>
+            p.id === editingProductId ? product : p,
+          );
+          if (product.stock > 0 && !activeBatches(product.id).length) {
+            state.batches.push({
+              id: uid(),
+              productId: product.id,
+              code: "Ajuste inicial",
+              qty: product.stock,
+              remaining: product.stock,
+              unitCost: product.cost,
+              expiry: product.expiry || "",
+              entryDate: todayISO(),
+            });
+          }
+        } else {
+          state.products.push(product);
+          if (product.stock > 0) {
+            state.batches.push({
+              id: uid(),
+              productId: product.id,
+              code: "Cadastro inicial",
+              qty: product.stock,
+              remaining: product.stock,
+              unitCost: product.cost,
+              expiry: product.expiry || "",
+              entryDate: todayISO(),
+            });
+          }
+        }
+        closeModal();
+        saveState();
+        toast("Produto salvo.");
+      }
+
+      function saveUserFromForm(data) {
+        if (!isAdmin())
+          return toast("Apenas administradores gerenciam acessos.");
+        const username = data.get("username").trim();
+        const repeated = state.users.some(
+          (u) =>
+            u.username.toLowerCase() === username.toLowerCase() &&
+            u.id !== editingUserId,
+        );
+        if (repeated) return toast("Já existe um usuário com esse login.");
+        const existing = editingUserId
+          ? state.users.find((u) => u.id === editingUserId)
+          : null;
+        const password = data.get("password");
+        if (!existing && !password) return toast("Informe uma senha.");
+        const user = {
+          id: editingUserId || uid(),
+          name: data.get("name").trim(),
+          username,
+          password: password || existing.password,
+          role: data.get("role"),
+          active: data.get("active") === "true",
+        };
+        if (
+          user.id === currentUser.id &&
+          (!user.active || user.role !== "admin")
+        ) {
+          return toast(
+            "Você não pode remover seu próprio acesso administrativo.",
+          );
+        }
+        if (editingUserId)
+          state.users = state.users.map((u) =>
+            u.id === editingUserId ? user : u,
+          );
+        else state.users.push(user);
+        closeModal();
+        saveState();
+        applyPermissions();
+        toast("Acesso salvo.");
+      }
+
+      function saveMovementFromForm(data) {
+        const product = productById(data.get("productId"));
+        const qty = Number(data.get("qty")) || 0;
+        const type = data.get("type");
+        if (!product || qty <= 0) return toast("Confira produto e quantidade.");
+        if (type === "saida" && product.stock - qty < 0) {
+          return toast("Saída maior que o estoque disponível.");
+        }
+        let batchesUsed = [];
+        const unitCost = Number(data.get("unitCost")) || product.cost;
+        if (type === "saida") {
+          try {
+            batchesUsed = consumeFefo(product, qty);
+          } catch {
+            return toast("Não há quantidade suficiente nos lotes ativos.");
+          }
+        }
+        product.stock += type === "entrada" ? qty : -qty;
+        if (type === "entrada") {
+          product.cost = unitCost;
+          state.batches.push({
+            id: uid(),
+            productId: product.id,
+            code:
+              data.get("batchCode").trim() ||
+              `Entrada ${dateBR(data.get("date"))}`,
+            qty,
+            remaining: qty,
+            unitCost,
+            expiry: data.get("expiry"),
+            entryDate: data.get("date"),
+          });
+        }
+        state.movements.push({
+          id: uid(),
+          productId: product.id,
+          type,
+          qty,
+          unitCost,
+          reason: data.get("reason").trim(),
+          person: data.get("person").trim(),
+          date: data.get("date"),
+          expiry:
+            type === "entrada"
+              ? data.get("expiry")
+              : batchesUsed[0]?.expiry || "",
+          batchCode: data.get("batchCode").trim(),
+          batchesUsed,
+          note: data.get("note").trim(),
+        });
+        closeModal();
+        saveState();
+        toast("Movimento registrado.");
+      }
+
+      function deleteProduct(id) {
+        if (!isAdmin())
+          return toast("Apenas administradores podem excluir produtos.");
+        const product = productById(id);
+        if (!product) return;
+        if (!confirm(`Excluir "${product.name}" e seus movimentos?`)) return;
+        state.products = state.products.filter((p) => p.id !== id);
+        state.movements = state.movements.filter((m) => m.productId !== id);
+        state.batches = state.batches.filter((b) => b.productId !== id);
+        saveState();
+        toast("Produto excluído.");
+      }
+
+      function deleteUser(id) {
+        if (!isAdmin())
+          return toast("Apenas administradores gerenciam acessos.");
+        const user = state.users.find((u) => u.id === id);
+        if (!user) return;
+        if (user.id === currentUser.id)
+          return toast("Você não pode excluir seu próprio usuário.");
+        if (!confirm(`Excluir o acesso de "${user.name}"?`)) return;
+        state.users = state.users.filter((u) => u.id !== id);
+        saveState();
+        toast("Acesso excluído.");
+      }
+
+      function exportJson() {
+        download(
+          "boteco-do-franca-backup.json",
+          JSON.stringify(state, null, 2),
+          "application/json",
+        );
+      }
+
+      function exportCsv(kind) {
+        const rows =
+          kind === "products"
+            ? [
+                [
+                  "Produto",
+                  "Categoria",
+                  "Unidade",
+                  "Fornecedor",
+                  "Estoque",
+                  "Minimo",
+                  "Maximo",
+                  "ProximaValidade",
+                  "Custo",
+                  "PVP",
+                  "Perda",
+                ],
+                ...state.products.map((p) => [
+                  p.name,
+                  p.category,
+                  p.unit,
+                  p.supplier,
+                  p.stock,
+                  p.min,
+                  p.max,
+                  nextBatch(p)?.expiry || "",
+                  p.cost,
+                  p.pvp,
+                  p.loss,
+                ]),
+              ]
+            : [
+                [
+                  "Data",
+                  "Tipo",
+                  "Produto",
+                  "Quantidade",
+                  "Validade",
+                  "Lote",
+                  "CustoUnitario",
+                  "Total",
+                  "Motivo",
+                  "Responsavel",
+                  "Observacao",
+                ],
+                ...state.movements.map((m) => {
+                  const p = productById(m.productId);
+                  return [
+                    m.date,
+                    m.type,
+                    p?.name || "",
+                    m.qty,
+                    m.expiry || "",
+                    m.batchCode ||
+                      movementBatchLabel(m).replaceAll("<br>", " | "),
+                    m.unitCost,
+                    m.qty * m.unitCost,
+                    m.reason,
+                    m.person,
+                    m.note,
+                  ];
+                }),
+              ];
+        const csv = rows
+          .map((r) =>
+            r
+              .map((v) => `"${String(v ?? "").replaceAll('"', '""')}"`)
+              .join(";"),
+          )
+          .join("\n");
+        download(
+          kind === "products"
+            ? "produtos-boteco-do-franca.csv"
+            : "movimentos-boteco-do-franca.csv",
+          csv,
+          "text/csv;charset=utf-8",
+        );
+      }
+
+      function download(filename, content, type) {
+        const blob = new Blob([content], { type });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      function restoreJson(file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(reader.result);
+            if (
+              !Array.isArray(parsed.products) ||
+              !Array.isArray(parsed.movements)
+            )
+              throw new Error();
+            state = migrateState(parsed);
+            saveState();
+            if (!state.users.some((u) => u.id === currentUser?.id && u.active))
+              logout();
+            else applyPermissions();
+            toast("Backup restaurado.");
+          } catch {
+            toast("Arquivo de backup inválido.");
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      function toast(message) {
+        const el = document.getElementById("toast");
+        el.textContent = message;
+        el.classList.add("show");
+        clearTimeout(window.toastTimer);
+        window.toastTimer = setTimeout(() => el.classList.remove("show"), 2400);
+      }
+
+      function switchSection(section) {
+        if (section === "acessos" && !isAdmin())
+          return toast("Apenas administradores acessam essa área.");
+        currentSection = section;
+        document
+          .querySelectorAll(".nav button")
+          .forEach((b) =>
+            b.classList.toggle("active", b.dataset.section === section),
+          );
+        document
+          .querySelectorAll(".section")
+          .forEach((s) => s.classList.toggle("active", s.id === section));
+        document.getElementById("pageTitle").textContent = titles[section][0];
+        document.getElementById("pageSubtitle").textContent =
+          titles[section][1];
+        document.getElementById("nav").classList.remove("open");
+      }
+
+      document.querySelectorAll(".nav button").forEach((btn) => {
+        btn.addEventListener("click", () => switchSection(btn.dataset.section));
+      });
+
+      document.getElementById("loginForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const data = new FormData(e.target);
+        login(data.get("username").trim(), data.get("password"));
+        e.target.reset();
+      });
+      document
+        .getElementById("menuBtn")
+        .addEventListener("click", () =>
+          document.getElementById("nav").classList.toggle("open"),
+        );
+      document
+        .getElementById("newProductBtn")
+        .addEventListener("click", () => openProductModal());
+      document
+        .getElementById("newMovementBtn")
+        .addEventListener("click", openMovementModal);
+      document
+        .getElementById("quickMoveBtn")
+        .addEventListener("click", openMovementModal);
+      document
+        .getElementById("newUserBtn")
+        .addEventListener("click", () => openUserModal());
+      document.getElementById("logoutBtn").addEventListener("click", logout);
+      document
+        .getElementById("closeModal")
+        .addEventListener("click", closeModal);
+      document
+        .getElementById("modalBackdrop")
+        .addEventListener("click", (e) => {
+          if (e.target.id === "modalBackdrop") closeModal();
+        });
+      document
+        .getElementById("backupBtn")
+        .addEventListener("click", exportJson);
+      document
+        .getElementById("restoreBtn")
+        .addEventListener("click", () =>
+          document.getElementById("restoreInput").click(),
+        );
+      document
+        .getElementById("restoreInput")
+        .addEventListener(
+          "change",
+          (e) => e.target.files[0] && restoreJson(e.target.files[0]),
+        );
+      document
+        .getElementById("csvProductsBtn")
+        .addEventListener("click", () => exportCsv("products"));
+      document
+        .getElementById("csvMovesBtn")
+        .addEventListener("click", () => exportCsv("moves"));
+      document.getElementById("resetBtn").addEventListener("click", () => {
+        if (!confirm("Reiniciar a base de demonstração?")) return;
+        localStorage.removeItem(STORE_KEY);
+        state = loadState();
+        currentUser = state.users.find((u) => u.username === "admin");
+        sessionStorage.setItem(SESSION_KEY, currentUser.id);
+        saveState();
+        applyPermissions();
+        toast("Base reiniciada.");
+      });
+
+      [
+        "productSearch",
+        "categoryFilter",
+        "statusFilter",
+        "movementSearch",
+        "movementTypeFilter",
+      ].forEach((id) => {
+        document.getElementById(id).addEventListener("input", renderAll);
+        document.getElementById(id).addEventListener("change", renderAll);
+      });
+
+      window.openProductModal = openProductModal;
+      window.openUserModal = openUserModal;
+      window.deleteProduct = deleteProduct;
+      window.deleteUser = deleteUser;
+      window.closeModal = closeModal;
+
+      initAuth();
+    </script>
+  </body>
+</html>
